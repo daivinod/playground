@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Model Viewer</title>
+    <!-- Include Model Viewer library -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        /* Ensure the html and body take up the full viewport */
+        html, body {
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        /* Style for the model viewer element */
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            background-color: #f3f3f3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Model Viewer element with .glb file -->
+    <model-viewer src="TTMotorBracket.glb"
+                  alt="A 3D model"
+                  auto-rotate
+                  camera-controls
+                  ar>
+    </model-viewer>
+</body>
+</html>
