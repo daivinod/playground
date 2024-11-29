@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vCard Viewer and Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .vcard {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .vcard h3 {
+            margin: 0;
+            color: #333;
+        }
+        input, button {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>vCard Viewer and Downloader</h1>
+    <p>Click the button below to fetch and view the vCard file:</p>
+    <button id="loadVCard">Load vCard</button>
+    <div id="output"></div>
+    <button id="saveContact" style="display: none;">Save as Contact</button>
+
+    <script>
+        let vcardUrl = 'contact.vcf'; // Replace with your hosted .vcf file URL
+
+        document.getElementById('loadVCard').addEventListener('click', async () => {
+            try {
+                const response = await fetch(vcardUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const vcardContent = await response.text();
+                parseVCard(vcardContent);
+
+                // Show the "Save as Contact" button
+                const saveButton = document.getElementById('saveContact');
+                saveButton.style.display = 'inline-block';
+                saveButton.onclick = () => saveVCard(vcardUrl);
+            } catch (error) {
+                console.error('Error fetching vCard:', error);
+                document.getElementById('output').innerHTML = '<p>Error loading vCard. Please try again later.</p>';
+            }
+        });
+
+        function parseVCard(content) {
+            const lines = content.split('\n');
+            const vCard = {};
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = ''; // Clear previous output
+
+            lines.forEach(line => {
+                if (line.startsWith('FN:')) {
+                    vCard.name = line.replace('FN:', '');
+                } else if (line.startsWith('TITLE:')) {
+                    vCard.title = line.replace('TITLE:', '');
+                } else if (line.startsWith('ORG:')) {
+                    vCard.organization = line.replace('ORG:', '');
+                } else if (line.startsWith('TEL')) {
+                    vCard.phone = line.split(':')[1];
+                } else if (line.startsWith('EMAIL:')) {
+                    vCard.email = line.replace('EMAIL:', '');
+                } else if (line.startsWith('ADR')) {
+                    vCard.address = line.split(':')[1];
+                } else if (line.startsWith('URL:')) {
+                    vCard.website = line.replace('URL:', '');
+                }
+            });
+
+            // Render the vCard content
+            const vCardDiv = document.createElement('div');
+            vCardDiv.className = 'vcard';
+
+            vCardDiv.innerHTML = `
+                <h3>Name:</h3>
+                <p>${vCard.name || 'N/A'}</p>
+
+                <h3>Title:</h3>
+                <p>${vCard.title || 'N/A'}</p>
+
+                <h3>Organization:</h3>
+                <p>${vCard.organization || 'N/A'}</p>
+
+                <h3>Phone:</h3>
+                <p>${vCard.phone || 'N/A'}</p>
+
+                <h3>Email:</h3>
+                <p>${vCard.email ? `<a href="mailto:${vCard.email}">${vCard.email}</a>` : 'N/A'}</p>
+
+                <h3>Address:</h3>
+                <p>${vCard.address || 'N/A'}</p>
+
+                <h3>Website:</h3>
+                <p>${vCard.website ? `<a href="${vCard.website}" target="_blank">${vCard.website}</a>` : 'N/A'}</p>
+            `;
+
+            outputDiv.appendChild(vCardDiv);
+        }
+
+        function saveVCard(url) {
+            // Create a link to download the file
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'contact.vcf'; // Default file name for download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
